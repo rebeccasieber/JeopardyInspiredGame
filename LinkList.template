@@ -1,0 +1,277 @@
+//DEFAULT CONSTRUCTOR
+template <class T>
+LinkList<T>::LinkList()
+{
+	first = last = nullptr;															//empty container
+}
+
+//COPY CONSTRUCTOR
+template <class T>
+LinkList<T>::LinkList(LinkList<T>& source)
+{
+	first = last = nullptr;															//starting with empty linked list
+	for (Node<T>* cursor = source.first; cursor != nullptr; cursor = cursor->next)	//Loopinh though each node
+		this->append(cursor->data);													//adding each node to the empty linked list
+}
+
+//DESTRUCTOR
+template <class T>
+LinkList<T>::~LinkList()
+{
+	free();																			//free function frees memory off heap
+}
+
+//ASSIGNMENT OPERATOR
+template <class T>
+LinkList<T>& LinkList<T>::operator=(const LinkList<T>& source)
+{
+	if (this == &source)															//checking for self assignment
+	{
+		return *this;																//if its already the same, doing nothing
+	}
+																					//If not already the same...
+	free();																			//freeing existing memory on heap
+	first = last = nullptr;															//ensuring linklist is empty
+	
+	for (Node<T>* cursor = first; cursor!=nullptr; cursor->next)					// traversing curor starting at source.first going until nullptr
+	{
+		this->append(cursor->data);													//copying node
+	}
+	return *this;
+}
+
+/*This function adds a node to the end of the link list*/
+template <class T>
+void LinkList<T>::append(T dataIn)
+{
+	Node<T>* tmp = first;															//Creating temp pointer to point at head
+	if (isEmpty())																	//if the linked list started out empty, making the new node the first and last
+	{
+		first = last = tmp = alloc(dataIn);											//allocating new node and assigning it to be first and last
+	}
+	else																			//linked list did not start out empty
+	{
+		while (tmp->next)															//looping through to end of linked list
+			tmp = tmp->next;
+		tmp->next = alloc(dataIn);													//creating new node and assigning it 
+		tmp->next->data = dataIn;													//assigning specified data to node
+		tmp->next->next = nullptr;													//Assigning last pointer to nullptr
+
+	}
+}
+
+/*This function adds a node to the beginning/head of the linked list*/
+template <class T>
+void LinkList<T>::addItem(T dataIn)
+{
+	Node<T>* item = alloc(dataIn);													// create a new Node item
+	Node<T>* tmp = first;															// save the location of head temporarily
+	first = item;																	// add the new node item to the beginning
+
+	if (first != nullptr)															// not an empty linklist
+	{
+		item->next = tmp;															//adding item to head of linklist
+	}
+}
+
+/*This function removes the first/head node*/ 
+template <class T>
+void LinkList<T>::removeFirst()
+{
+	Node<T>* tmp = first;															//setting temp pointer to first node
+
+	if (isEmpty())																	//checking to see if linked list is empty
+		return;																		//leaving function becuase theres nothing to do
+
+	if (!isEmpty() && first == last)												//Checking if there is only 1 node
+	{
+		first = last = nullptr;														//reseting single node pointers
+		delete tmp;																	//deleting heap memory
+		return;
+	}
+	   /*Not empty and more than 1 node*/
+		first = tmp->next;															//setting first pointer to second node
+		delete tmp;																	//deleting heap memory
+
+}
+
+/*This function removes a node given the node data*/
+template <class T>
+void LinkList<T>::removeNode(T item)
+{
+	if (isEmpty())																	//if linked list is already empty, do nothing
+		 return; 				
+
+	else if (item == first->data)													//if given item is the first node, using function to remove first node
+		removeFirst();	
+	
+	else																			//If linked list is NOT empty and node to delete is NOT first node
+	{
+		Node<T>* nodeToRemove = findNode(item);										//calls private function that returns pointer to node
+		Node<T>* prevNode = nullptr;												//Placeolder to hold pointer to previous node
+		if (nodeToRemove != nullptr)												//as long as node you want to remove is not already null
+		{
+			for (prevNode = first; prevNode != nullptr; prevNode = prevNode->next)  //lopping through link list to find node to remove
+				if (prevNode->next == nodeToRemove)									//If you find the node, exit the loop and stop looking for it
+					break;
+			prevNode->next = nodeToRemove->next;									//Reassign pointers curcumventing node to remove
+			delete nodeToRemove;													//removing the node
+		}
+	} 
+}
+
+/*This function removes all nodes from a linked list*/
+template <class T>
+void LinkList<T>::removeAll()
+{
+	Node<T>* tempNode = first;														// tempory pointer to store location of next node
+	
+	while (tempNode != nullptr)														//continuing loop until linked list is empty
+	{
+		first = tempNode->next;														//reassigning head node to second node since tempnode is the head now
+		delete tempNode;															//deleting node
+		tempNode = first;															//assigning tempNode to new head after previous was deleted
+	}
+
+}
+
+/*This function checks to see if linked list is empy and returns true if it is empty*/
+template <class T>
+bool LinkList<T>::isEmpty()
+{
+	return (first == nullptr);														//head node is null when link list is empty, so this will return true if it empty
+}
+
+/*This function prints the linked list from head to tail*/
+template <class T>
+void LinkList<T>::printForwards()
+{
+	for (Node<T>* cursor = first; cursor != nullptr; cursor = cursor->next)			//looping through linklist
+		std::cout << cursor->data << std::endl;										//printing each node as we go
+}
+
+/*This function reads data from a file into a linked list*/
+template <class T>
+bool LinkList<T>::readFile(std::string fileName)									//Readfile
+{
+	T t0;																			//creating temp list template object initialized to default values
+
+	std::ifstream infile(fileName.c_str());											// Creating the ifstream and opening the file
+
+	if (!infile)																	//checking to see if file opened, and returning false if it did not
+	{
+		std::cout << "ERROR- Unable to open file." << std::endl;					//Printing error message for better troubleshooting
+		return false;																//terminating function
+	}
+
+	infile >> t0;																	//extracting data from file and placing into list template object
+
+	while (!infile.eof())															// Reading from the file and extracting data until the end of the file
+	{
+		infile.ignore();															//ignoring newline character
+		Add(t0);																//adds another list template object to array/bag
+		//std::cout << "added item" << std::endl;									//This is for additional trouble shooting as needed
+		infile >> t0;																//extracting data from file and placing into new list template object
+	}
+
+	infile.close();																	// Closing the file
+	return true;
+}
+
+/*This function writes data from a linked list into a CSV file*/
+template <class T>
+bool LinkList<T>::writeFile(std::string fileName)									//WriteFile
+{
+
+	std::ofstream outfile(fileName.c_str());										// Creating the ofstream, opening the file, and checking that it opened properly
+
+	if (!outfile)																	//if opening failed, returning false
+		return false;
+
+	for (Node<T>* cursor = first; cursor != nullptr; cursor = cursor->next)         // Writinging to the file each piece of data until index is equal to used
+		outfile << cursor->data << "\n";											//outputting data back to file
+
+	outfile.close();																// Closing the file
+}
+/*This function returns the number of items/nodes in a linked list */
+template <class T>
+int LinkList<T>::getItemCount()
+{
+	int nodeCounter = 0;															//initializing counter
+
+	for (Node<T>* cursor = first; cursor != nullptr; cursor = cursor->next)			//looping through each node in the linklist
+	{
+		nodeCounter++;																//increasing node counter for each loop
+	}	
+
+	return nodeCounter;
+}
+
+/*This function grabs a random item/node from a linked list and returns the item*/
+template <class T>
+T LinkList<T>::getRandomItem()
+{
+	int randInt;																	//index chosen from list randomly
+	Node<T>* tmpNode = first;														//holds pointer to randomly chosen node
+	T randomItem;																	//holds data from randomly chose node 
+
+	srand(time(NULL));																//initializing random seed
+	randInt = rand() % getItemCount();												//finding random number from 0 to # of items in List
+
+	for (int i = 0; i <= randInt; i++)												//looping through the link list same number of times as random int
+	{
+		tmpNode = tmpNode->next;													//moving to the next node
+	}
+
+	randomItem = tmpNode->data;														//extracting data from pointer
+
+	removeNode(tmpNode->data);														//Removing node at the randomly chosed index
+	return randomItem;																//returning Linkedlist item that was randomly selected and deleted from the list
+	
+}
+
+//PRIVATE MEMBER FUNCTION DEFINITIONS
+/*This function allocates new data on the heap so that an additional node can be added to a linked list*/
+template <class T>
+Node<T>* LinkList<T>::alloc(T dataIn) 
+{
+	return new Node<T>(dataIn); 
+}
+
+/*This function frees memory off the heap to avoid memory leaks*/
+template <class T>
+void LinkList<T>::free()
+{
+	while (!isEmpty())																//continue to loop until linked list is empty
+	{
+		removeFirst();																//this function uses delete to remove the first node
+
+	}
+}
+
+/*This function prints a linked list backwards*/
+template <class T>
+void LinkList<T>::printBackwards(Node<T>* cursor)
+{
+	if (cursor != nullptr)															//as long as not at end of link list
+	{
+		printBackward(cursor->next);												//recursive function calls itself
+		std::cout << cursor->data << "\n";											//printing node data
+	}
+}
+
+/*This function finds a node given the data, and returns the pointer to that node*/
+template <class T>
+Node<T>* LinkList<T>::findNode(T item)
+{
+	Node<T>* cursor = nullptr;
+
+	for (cursor = first; cursor != nullptr; cursor = cursor->next)					//looping through linked list
+	{
+		if (cursor->data == item)													//comparing data provided to node data
+		{
+			return cursor;															//returning pointer to found node
+		}
+	}
+	return nullptr;																	//if node could not be found, returning the nullptr
+}

@@ -1,0 +1,14 @@
+
+template <class T>
+Node<T>::Node()
+{ 
+	data = T(); 
+	next = nullptr; 
+}
+
+template <class T>
+Node<T>::Node(T dataIn) 
+{ 
+	data = dataIn; 
+	next = nullptr; 
+}

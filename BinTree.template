@@ -1,0 +1,213 @@
+//DEFAULT CONSTRUCTOR
+template <class T>
+BinTree<T>::BinTree()
+{
+	root = nullptr;
+}
+
+//COPY CONSTRUCTOR
+template <class T>
+BinTree<T>::BinTree(const BinTree<T>& source)
+{
+	this->root = nullptr;
+	*this = source;
+}
+
+//ASSIGNMENT OPERATOR
+template <class T>
+BinTree<T>& BinTree<T>::operator=(const BinTree<T>& source)
+{
+	
+	if (this == &source)									//Checking for self assignment
+		return *this;										//returning itself if there is a self assignment
+	
+	free(root);												//If no self assignment, free existing memory
+	copyTree(source.root);									//Calling private function
+}
+
+//DESTRUCTOR
+template <class T>
+BinTree<T>::~BinTree()
+{
+	free(root);
+}
+
+/*This function uses the alloc funtion to allocated new memory and add a node to the tree.*/
+template <class T>
+void BinTree<T>::Add(T dataIn)
+{
+	BinNode<T>* leaf = alloc(dataIn);						//Allocating new data to tree
+	BinNode<T>* cursor = root;
+	
+	if (root == nullptr)									//If it is an empty tree
+	{
+		root = leaf;										//assigning new data as root 
+		return;
+	}
+	while (cursor != nullptr)								//Traversing tree to find correct place for leaf
+	{
+		if (dataIn <= cursor->data)							//If new leaf belongs in leftLink
+		{
+			if (cursor->leftLink == nullptr)				// its open so add it
+			{
+				cursor->leftLink = leaf;					//Adding new data to tree
+				return;
+			}
+			else										   // not open move down the branch
+				cursor = cursor->leftLink;
+		}
+		else												//New leaf belongs in  rightLink
+		{
+			if (cursor->rightLink == nullptr)				// its open so add it
+			{
+				cursor->rightLink = leaf;					//Adding new data to tree
+				return;
+			}
+			else											// not open move down the branch
+				cursor = cursor->rightLink;
+		}
+	}
+}
+
+/*This function calls the private data function to print out all the nodes in a tree*/
+template <class T>
+void BinTree<T>::Print()
+{
+	print(root);
+}
+
+/*This function writes tree data to a csv file*/
+template <class T>
+void BinTree<T>::WriteFile(std::string fileName)
+{
+	std::ofstream out(fileName.c_str());
+	writeFile(root, out);
+	out.close();
+}
+
+template <class T>
+bool BinTree<T>::ReadFile(std::string fileName)
+{
+	T t0;														//creating temp list template object initialized to default values
+
+	std::ifstream infile(fileName.c_str());						// Creating the ifstream and opening the file
+
+	if (!infile)												//checking to see if file opened, and returning false if it did not
+	{
+		std::cout << "ERROR- Unable to open file." << std::endl;//Printing error message for better troubleshooting
+		return false;											//terminating function
+	}
+
+	infile >> t0;												//extracting data from file and placing into tree object
+
+	while (!infile.eof())										// Reading from the file and extracting data until the end of the file
+	{
+		infile.ignore();										//ignoring newline character
+		Add(t0);												//adds another list template object to array/bag
+		//std::cout << "added item" << std::endl;				//This is for additional trouble shooting as needed
+		infile >> t0;											//extracting data from file and placing into new list template object
+	}
+
+	infile.close();												// Closing the file
+	return true;												//Returning success
+}
+
+template <class T>
+int BinTree<T>::CountItems()
+{
+	return countItems(root);
+}
+
+/*This function traverses a tree in order and conducts a specified process at each node*/
+template <class T>
+void BinTree<T>::inOrderTraversal(int count1, void process(T, int&, int&)) 
+{
+	int count2 = 1;												//setting count2 to starting value 1
+	inOrderTraversal(count1, count2, process, root);			//calling private data function
+}
+
+/*This funtion allocates new data to a tree so a new node can be added*/
+template <class T>
+BinNode<T>* BinTree<T>::alloc(T dataIn)
+{
+	BinNode<T>* leaf = new BinNode<T>(dataIn);					//Creating new memory for a new node to the tre and returns a pointer to the new node
+	return leaf;
+}
+
+/*This function frees all the memory off of a tree (deletes it, essentially)*/
+template <class T>
+void BinTree<T>::free(BinNode<T>* cursor)
+{
+	if (cursor != nullptr)										//As long as the tree is not empty
+	{
+		// post-order: left, right, process
+		free(cursor->leftLink);
+		free(cursor->rightLink);
+		delete cursor;
+	}
+}
+
+/*This function prints all of the binary node trees in order */
+template <class T>
+void BinTree<T>::print(BinNode<T>* cursor)
+{
+	if (cursor != nullptr)
+	{
+		// in-order: leftLink, process cursor, rightLink
+		print(cursor->leftLink);								 // recursion
+		std::cout << cursor->data << "\t" << cursor << std::endl;//printing node data 
+		print(cursor->rightLink);								// recursion
+	}
+}
+
+/*This function uses recursion to traverse through all the nodes and copy them to a new tree*/
+template <class T>
+void BinTree<T>::copyTree(BinNode<T>* cursor)
+{
+	if (cursor != nullptr)
+	{
+		Add(cursor->data);										// process
+		copyTree(cursor->leftLink);								//recursion
+		copyTree(cursor->rightLink);							//recursion
+	}
+}
+
+/*This function uses recursion to traverse through a tree and complete a specified process on each node*/
+template <class T>
+void BinTree<T>::inOrderTraversal(int& count1, int& count2, void process(T, int&, int&), BinNode<T>* cursor)
+{
+	if(cursor != nullptr) 
+	{
+		inOrderTraversal(count1, count2, process, cursor->leftLink); //recursion
+		process(cursor->data, count1, count2);						//completing specified process
+		count2++;													//increasing counter
+		inOrderTraversal(count1, count2, process, cursor->rightLink);//recursion
+	}
+}
+
+/*This function writes all tree node data to a csv file*/
+template <class T>
+void BinTree<T>::writeFile(BinNode<T>* cursor, std::ofstream& ofs)
+{	
+	if (cursor != nullptr)										//as long as the tree is not empty
+	{
+		// pre-order
+		ofs << cursor->data;									//outputting node data
+		writeFile(cursor->leftLink, ofs);						//Recursion 
+		writeFile(cursor->rightLink, ofs);						//Recursion
+	}
+}
+
+/*This function counts the number of nodes in a tree and returns the int*/
+template <class T>
+int BinTree<T>::countItems(BinNode<T>* cursor)
+{
+	if (cursor != nullptr)										//as long as its not empty
+	{
+		// process
+		return countItems(cursor->leftLink) +					//recursion
+			countItems(cursor->rightLink) + 1;
+	}
+}
+
+

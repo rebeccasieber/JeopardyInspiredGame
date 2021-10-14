@@ -1,0 +1,15 @@
+template <class T>
+
+BinNode<T>::BinNode()
+{
+	data = 0.0;
+	leftLink = rightLink = nullptr;
+}
+
+template <class T>
+BinNode<T>::BinNode(T dataIn)
+{
+	data = dataIn;
+	leftLink = rightLink = nullptr;
+}
+
