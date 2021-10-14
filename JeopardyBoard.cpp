@@ -14,8 +14,8 @@ allows the user/player choose questions from the board, guess the correct answer
 #include "Question.h"									// Question class
 #include "LinkList.h"									// List template ordered container class
 #include "BinNode.h"									// BinNode class- friends with Bintree 
-#include "BinTree.h"									//Bintree data structure template
-#include "HTMLfunc.h"									//forms visual Jeopardy board in web browser
+#include "BinTree.h"									// Bintree data structure template
+#include "HTMLfunc.h"									// forms visual Jeopardy board in web browser
 
 int main()
 {
@@ -36,31 +36,31 @@ int main()
 	
 	std::string randCategories[6];							//1d array that holds 6 categories chosen randomly from array above
 
-for (int i = 0; i<22; i++)						
+	for (int i = 0; i<22; i++)						
 	{	
 		categories.append(potCategories[i]);					//loading all elements of potCategories array into linked list
 	}
 
-for (int i = 0; i < 6; i++)
-{
+	for (int i = 0; i < 6; i++)
+	{
 	randCategories[i] = categories.getRandomItem();					//loading 6 random elements (strings) from categories list 
-}											//into array randCategories
+	}										//into array randCategories
 
-questions1.ReadFile(randCategories[0]);							//reading rand cat 1 into binary tree
-questions2.ReadFile(randCategories[1]);							//reading rand cat 2  into binary tree
-questions3.ReadFile(randCategories[2]);							//reading rand cat 3 into binary tree
-questions4.ReadFile(randCategories[3]);							//reading rand cat 4 into binary tree
-questions5.ReadFile(randCategories[4]);							//reading rand cat 5 into binary tree
-questions6.ReadFile(randCategories[5]);							//reading rand cat 6 into binary tree
+	questions1.ReadFile(randCategories[0]);						//reading rand cat 1 into binary tree
+	questions2.ReadFile(randCategories[1]);						//reading rand cat 2  into binary tree
+	questions3.ReadFile(randCategories[2]);						//reading rand cat 3 into binary tree
+	questions4.ReadFile(randCategories[3]);						//reading rand cat 4 into binary tree
+	questions5.ReadFile(randCategories[4]);						//reading rand cat 5 into binary tree
+	questions6.ReadFile(randCategories[5]);						//reading rand cat 6 into binary tree
 
-printHTMLindex(randCategories);								//passing in the array of category names to HTLM file
-printHTMLpages(questions1, 1);								//pass in the BinTree collection of Questions and the category counter 1 - 6 
-printHTMLpages(questions2, 2);
-printHTMLpages(questions3, 3);
-printHTMLpages(questions4, 4);
-printHTMLpages(questions5, 5);
-printHTMLpages(questions6, 6);
-system("index.htm");									// this will open the index.htm page in the default browser to display the game
+	printHTMLindex(randCategories);							//passing in the array of category names to HTLM file
+	printHTMLpages(questions1, 1);							//pass in the BinTree collection of Questions and the category counter 1 - 6 
+	printHTMLpages(questions2, 2);
+	printHTMLpages(questions3, 3);
+	printHTMLpages(questions4, 4);
+	printHTMLpages(questions5, 5);
+	printHTMLpages(questions6, 6);
+	system("index.htm");								// this will open the index.htm page in the default browser to display the game
 
 	return 0;
 }
